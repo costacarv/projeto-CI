@@ -3,6 +3,8 @@ FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
 COPY mvnw .
+RUN chmod +x mvnw
+
 COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
