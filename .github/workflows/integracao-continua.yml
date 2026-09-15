@@ -1,7 +1,7 @@
 name: CI Voll Med
 
 on:
-  push: 
+  push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
@@ -11,31 +11,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Configura JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Configura Docker Compose
-      run: |
-        sudo rm -f /usr/local/bin/docker-compose
-        curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
-        docker-compose --version
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Roda Docker Compose
-      run: docker-compose up -d
-  
-    - name: Executa testes unitários
-      run: mvn -B verify
+      - name: Configura JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
 
-    - name: Gera relatório Jacoco
-      run: mvn jacoco:prepare-agent verify
-    
-    - name: Análise estática
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn sonar:sonar -Dsonar.projectKey=costacarv_projeto-CI
+      - name: Configura Docker Compose
+        run: |
+          sudo rm -f /usr/local/bin/docker-compose
+          curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Roda Docker Compose
+        run: docker-compose up -d
+
+      - name: Executa testes e gera cobertura JaCoCo
+        run: mvn -B clean verify
+
+      - name: Análise estática com SonarQube Cloud
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >
+          mvn sonar:sonar
+          -Dsonar.projectKey=costacarv_projeto-CI
+          -Dsonar.organization=costacarv
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.token=${SONAR_TOKEN}
