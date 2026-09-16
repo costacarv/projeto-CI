@@ -1,19 +1,20 @@
-#! /bin/bash
+#!/bin/bash
 
+set -e
+
+echo "==> Carregando imagem da API..."
 docker load -i vollmed-api.tar
 
-mv docker-compose-prod.yaml docker-compose.yaml
+echo "==> Preparando Docker Compose..."
+cp docker-compose-prod.yaml docker-compose.yaml
 
-container_ids=$(docker ps -q)
+echo "==> Derrubando containers antigos..."
+docker compose down || true
 
-if [ -z "$container_ids" ]; then
-  echo "Não há containers em execução"
-else
-  for container_id in $container_ids; do
-    echo "Parando container: $container_id"
-    docker stop $container_id
-  done
-  echo "Todos os containers em execução foram parados!"
-fi
-
+echo "==> Subindo nova versão..."
 docker compose up -d
+
+echo "==> Containers em execução:"
+docker compose ps
+
+echo "==> Deploy concluído."
