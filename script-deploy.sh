@@ -14,11 +14,11 @@ cp docker-compose-prod.yaml docker-compose.yaml
 echo "==> Derrubando versão anterior..."
 docker compose down || true
 
-echo "==> Removendo imagens Docker não utilizadas..."
-docker image prune -a -f
-
 echo "==> Subindo nova versão..."
 docker compose up -d
+
+echo "==> Removendo imagens antigas..."
+docker image prune -f
 
 echo "==> Status:"
 docker compose ps
