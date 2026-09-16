@@ -1,4 +1,7 @@
-FROM eclipse-temurin:17-jdk
+# =========================
+# Etapa 1 - Build
+# =========================
+FROM eclipse-temurin:17-jdk AS build
 
 WORKDIR /app
 
@@ -7,10 +10,24 @@ RUN chmod +x mvnw
 
 COPY .mvn .mvn
 COPY pom.xml .
+
+# Baixa dependências antes de copiar o código
+RUN ./mvnw dependency:go-offline -B
+
 COPY src src
 
-RUN ./mvnw package -DskipTests
+RUN ./mvnw clean package -DskipTests
 
-ARG JAR_FILE=target/*.jar
 
-CMD java -jar target/*.jar
+# =========================
+# Etapa 2 - Runtime
+# =========================
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
