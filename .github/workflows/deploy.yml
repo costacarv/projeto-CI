@@ -27,8 +27,8 @@ jobs:
       - name: Roda Docker Compose
         run: docker compose up -d
 
-      - name: Lista imagens Docker
-        run: docker images
+      - name: Verifica imagem criada
+        run: docker images vollmed-api
 
       - name: Deploy para EC2
         env:
