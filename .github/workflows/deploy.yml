@@ -33,18 +33,31 @@ jobs:
       - name: Deploy para EC2
         env:
           PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           USER: ubuntu
           HOST: 100.27.205.56
+      
         run: |
           echo "$PRIVATE_KEY" > deploy_key.pem
           chmod 600 deploy_key.pem
-
+      
           docker save -o vollmed-api.tar vollmed-api:latest
-
-          scp -o StrictHostKeyChecking=no -i deploy_key.pem vollmed-api.tar $USER@$HOST:/home/ubuntu/
-          scp -o StrictHostKeyChecking=no -i deploy_key.pem init.sql $USER@$HOST:/home/ubuntu/
-          scp -o StrictHostKeyChecking=no -i deploy_key.pem docker-compose-prod.yaml $USER@$HOST:/home/ubuntu/
-          scp -o StrictHostKeyChecking=no -i deploy_key.pem script-deploy.sh $USER@$HOST:/home/ubuntu/
-
+      
+          scp -o StrictHostKeyChecking=no -i deploy_key.pem \
+            vollmed-api.tar $USER@$HOST:/home/ubuntu/
+      
+          scp -o StrictHostKeyChecking=no -i deploy_key.pem \
+            docker-compose-prod.yaml $USER@$HOST:/home/ubuntu/
+      
+          scp -o StrictHostKeyChecking=no -i deploy_key.pem \
+            script-deploy.sh $USER@$HOST:/home/ubuntu/
+      
+          printf 'MYSQL_ROOT_PASSWORD=%s\n' "$MYSQL_ROOT_PASSWORD" > .env
+      
+          scp -o StrictHostKeyChecking=no -i deploy_key.pem \
+            .env $USER@$HOST:/home/ubuntu/.env
+      
           ssh -o StrictHostKeyChecking=no -i deploy_key.pem $USER@$HOST \
-            "chmod +x script-deploy.sh && ./script-deploy.sh"
+            "chmod 600 /home/ubuntu/.env && chmod +x script-deploy.sh && ./script-deploy.sh"
+      
+          rm -f deploy_key.pem .env
