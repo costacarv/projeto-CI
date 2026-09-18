@@ -23,7 +23,12 @@ jobs:
 
       - name: Verifica Docker Compose
         run: docker compose version
-
+        
+      - name: Valida Docker Compose de produção
+        env:
+          MYSQL_ROOT_PASSWORD: dummy-ci-password
+        run: docker compose -f docker-compose-prod.yaml config --quiet
+        
       - name: Roda Docker Compose
         run: docker compose up -d
 
