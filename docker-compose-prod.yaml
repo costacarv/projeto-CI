@@ -1,17 +1,17 @@
-services:
-  mysqldb:
-    image: mysql:8.0.36
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=vollmed_api
-    volumes:
-      - ./mysql-data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
-    ports:
-      - "3306:3306"
-    networks:
-      - vollmed
+mysqldb:
+  image: mysql:8.0.36
+
+  environment:
+    - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    - MYSQL_DATABASE=vollmed_api
+
+  volumes:
+    - ./mysql-data:/var/lib/mysql
+
+  restart: unless-stopped
+
+  networks:
+    - vollmed
   
   api:
     image: vollmed-api:latest  
