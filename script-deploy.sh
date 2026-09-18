@@ -2,6 +2,8 @@
 
 set -e
 
+cd /home/ubuntu
+
 echo "==> Carregando nova imagem..."
 docker load -i vollmed-api.tar
 
