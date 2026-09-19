@@ -3,7 +3,7 @@ services:
   mysqldb:
     image: mysql:8.0.36
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=motor
       - MYSQL_DATABASE=vollmed_api
     volumes:
       - ./mysql-data:/var/lib/mysql
